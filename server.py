@@ -7,9 +7,7 @@ import logging
 import sys
 import json
 import facial_recognition
-import cv2
 import opencv
-from stroke_assessment import Assessment
 
 
 class MECServerProtocol(WebSocketServerProtocol):
@@ -25,27 +23,16 @@ class MECServerProtocol(WebSocketServerProtocol):
     def onConnect(self, request):
         print "Client connecting: {}".format(request.peer)
 
-        if request.path == "/live":
-            self.web_connections.add(self)
-
-        elif request.path == "/get":
+        if request.path == "/get":
             print "new ambulance connection"
-
-            ambulance_assessment = Assessment()
-            self.edge_connections[self] = ambulance_assessment
 
     def onOpen(self):
         print"WebSocket connection open."
 
-        #assessment = self.edge_connections[self]
-        #self.sendMessage(json.dumps(assessment.start_test()), False)
-
     def onMessage(self, payload, isBinary):
 
-        # get assessment object of connection
-
         try:
-            assessment = self.edge_connections[self]
+
             client_message = json.loads(payload)
 
             if client_message["type"] == "init":
@@ -61,6 +48,7 @@ class MECServerProtocol(WebSocketServerProtocol):
                 if client_message["mode"] == "identify":
 
                     patient = facial_recognition.find_patient(cv_image)
+                    print "patient: {}".format(patient)
                     
                     if patient.has_key("ERROR"):
 
@@ -69,13 +57,14 @@ class MECServerProtocol(WebSocketServerProtocol):
                         elif patient["ERROR"] == "PERSON":
                             self.sendMessage(json.dumps({"ERROR": "Patient not recognised", "type": "get_image", "mode": "identify"}))
 
-                    elif patient["type"] == "patient":
+                    else:
+                        # Add message parameters
+                        patient["mode"] = "identify"
+                        patient["type"] = "patient"
                         self.sendMessage(json.dumps(patient))
 
-                #self.sendMessage(json.dumps({"type": "get_image"}))
-
-        except KeyError, e:
-            print "no assessment found"
+        except Exception as e:
+            print e
 
     def onClose(self, wasClean, code, reason):
         print("WebSocket connection closed: {0}".format(reason))
@@ -83,31 +72,6 @@ class MECServerProtocol(WebSocketServerProtocol):
     def get_assessment_id(self):
         self.assessment_id = self.assessment_id + 1
         return self.assessment_id
-
-    def sendDiagnostics(self, image):
-        pass
-        # convert data to image
-
-    def check_result(self, assessment, result):
-
-        current_stage = assessment.get_stage()
-
-        if current_stage == "Complete":
-            self.sendMessage(json.dumps({"command": "Complete"}), False)
-            del self.edge_connections[self]
-            assessment.send_results()
-            self.sendClose()
-
-        else:
-
-            # if test is ready
-            if assessment.has_timeout():
-                assessment.calculate_result()
-                self.sendMessage(json.dumps(assessment.start_next_stage()), False)
-
-            else:
-                assessment.save_result(result)
-                assessment.increase_frame()
 
     def __hash__(self):
         return hash((self.obj_uuid))

@@ -1,5 +1,5 @@
 import sys
-sys.path.append('libsvm\python')
+sys.path.append('../libsvm/python')
 from svmutil import *
 from scipy.spatial import distance
 
@@ -19,7 +19,7 @@ def label_to_emotion(label):
     emotions = {
         0: 'None',
         1: 'Mild',
-        2: 'Moderate',  # Not used at the moment
+        2: 'Moderate',
         3: 'Severe',
     }
 
