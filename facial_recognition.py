@@ -15,9 +15,8 @@ facerec = dlib.face_recognition_model_v1("cascades/dlib_face_recognition_resnet_
 """
 
 people = list()
-people.append({"details": {"name": "Barack Obama", "age": "57", "sex": "Male", "height": "183 CM", "weight": "75 KG", "bmi": "24", "image": "images/obama.jpg"}})
-#people.append({"details": {"name": "Example2", "age": "27", "sex": "male", "height": "170", "weight": "83", "image": "images/x.png"}})
-
+people.append({"details": {"name": "Barack Obama", "age": "57", "sex": "Male", "height": "183 CM", "weight": "75 KG", "bmi": "24", "image_path": "images/obama.jpg"}})
+#people.append({"details": {"name": "Example2", "age": "27", "sex": "Male", "height": "170 CM", "weight": "83 KG", "bmi": "23", "image_path": "images/x.png"}})
 
 """
     Calculate recognition data that will be used to compare against person
@@ -27,7 +26,7 @@ people.append({"details": {"name": "Barack Obama", "age": "57", "sex": "Male", "
 for person in people:
 
     try:
-        base_image = dlib.load_rgb_image(person["details"]["image"])
+        base_image = dlib.load_rgb_image(person["details"]["image_path"])
 
         dets = detector(base_image, 1)
         for k, d in enumerate(dets):

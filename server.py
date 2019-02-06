@@ -48,8 +48,7 @@ class MECServerProtocol(WebSocketServerProtocol):
                 if client_message["mode"] == "identify":
 
                     patient = facial_recognition.find_patient(cv_image)
-                    print "patient: {}".format(patient)
-                    
+
                     if patient.has_key("ERROR"):
 
                         if patient["ERROR"] == "FACES":
@@ -59,6 +58,7 @@ class MECServerProtocol(WebSocketServerProtocol):
 
                     else:
                         # Add message parameters
+                        patient["image"] = cPickle.dumps(opencv.open_image(patient["image_path"]))
                         patient["mode"] = "identify"
                         patient["type"] = "patient"
                         self.sendMessage(json.dumps(patient))

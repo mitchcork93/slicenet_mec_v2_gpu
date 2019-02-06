@@ -21,6 +21,16 @@ colour_codes = {
 }
 
 
+def open_image(path):
+
+    try:
+        return cv2.imread(path)
+
+    except Exception as e:
+        print 'ERROR - {}'.format(e)
+        return None
+
+
 def get_rects(img, scale, all=True):
 
     global cnn_face_detector
@@ -126,5 +136,7 @@ def detect_pain(img):
             cv2.rectangle(img, (d.rect.left(), d.rect.top()), (d.rect.right(), d.rect.bottom()), colour_codes[pain], 2)
 
         cv2.putText(img, pain_text, (10, 450), font, 2, colour_codes[pain], 2, cv2.LINE_AA)
+
+        break # Only do one face
 
     return img
